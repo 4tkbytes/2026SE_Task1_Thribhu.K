@@ -1,20 +1,22 @@
 import sys
 import getpass
 
+database = "my_work/pass.csv"
+
 def quit():
     print("Goodbye, see you later :)")
     sys.exit(0)
 
 def write(username:str, password:str):
     # check if user already exists
-    with open("my_work/pass.csv", 'r') as file:
+    with open(database, 'r') as file:
         for line in file:
             if username in line:
                 print("User already exists, therefore unable to create new user. Returning")
                 return "User already exists"
     
     # append item to file
-    with open("my_work/pass.csv", "a") as file:
+    with open(database, "a") as file:
         file.write(f"{username},{password}\n")
     return ""
 
@@ -27,17 +29,86 @@ def search_file_k(file_path:str, keyword:str):
         print("Keyword does not exist")
         return
 
+def change_item_in_file_k(file_path:str, keyword:str, new_item:str):
+    # Open old password file
+    segregated = ""
+    list_of_users = []
+    with open(file_path) as old_file:
+        for line in old_file:
+            # check if keyword is in line
+            if keyword in line:
+                segregated = line.strip().split(",")[0]
+            else:
+                # else append to list
+                list_of_users.append(line)
+    
+    # create a new file under same name
+    with open(file_path, "w") as file:
+        for item in list_of_users:
+            file.write(item)
+        file.write(f"{segregated},{new_item}")
+    
+    print("Item successfully changed!")
+    return ""
+
+def change_password():
+    old_password = getpass.getpass("Input your old password for verification (no echo): ")
+    try:
+        if old_password == search_file_k(database, old_password)[1]:
+            print("Password verified!")
+    except Exception:
+        print("Old password is wrong, returning back to main menu...")
+        return "Old password is not correct"
+
+    while True:
+        tmp = getpass.getpass("Input your new password (no echo): ")
+        if len(tmp) < 4:
+            print("Password is less than 4 characters")
+            continue
+        new_password = getpass.getpass("Confirm your new password (no echo): ")
+        if new_password == tmp:
+            return change_item_in_file_k(database, old_password, new_password)
+        else:
+            print("Password is not the same, try again...")
+            continue
+
+
 def post_auth_menu():
-    raise NotImplementedError("You have arrived at the post auth menu hooray!")
+    while True:
+        err_string = ""
+        print(f"""
+        ===========================
+            Example Auth Client
+        ===========================
+            Choose your option
+            ---
+            [1] - Change Password
+
+            [q] - Logout
+        ===========================
+        {"Error: " if not len(err_string) == 0 else ""}{err_string if not len(err_string) == 0 else "    No errors reported"}
+        ===========================
+            """)
+        choice = input("Choice: ").lower()
+        match choice:
+            case "1":
+                err_string = change_password()
+                continue
+            case "q":
+                print("Successfully logged out!")
+                quit()
+            case _:
+                print("Choice does not exist")
+                continue
 
 def login():
     username = input("Input your username: ")
     password = getpass.getpass("Input your password (No echo): ")
     
-    search = search_file_k("my_work/pass.csv", username)
+    search = search_file_k(database, username)
     try:
         if password in search:
-            print("Authentication successfull!")
+            print("Authentication successful!")
         else:
             print("Password is not correct, returning back to main menu")
             return "Incorrect Password!"
@@ -50,17 +121,20 @@ def login():
 def register():
     # check if file exists, if not create a new one
     try:
-        file = open("my_work/pass.csv")
+        file = open(database)
         file.close()
     except:
         print("File doesn't exist, initialising new pass file")
-        file = open("my_work/pass.csv", "w")
+        file = open(database, "w")
         file.close()
     
     # ask user for their username and password
     username = input("Enter your username: ")
     while True:
         password = getpass.getpass("Enter your password (No password echo for security purposes): ", )
+        if len(password) < 4:
+            print("Password must be greater than 4 characters, try again...")
+            continue
         reconfirm_password = getpass.getpass("Reconfirm your password: ")
         if password == reconfirm_password:
             print("Password confirmed!")
@@ -80,7 +154,7 @@ def register():
 def check_user_count():
     try:
         line_count = 0
-        with open("my_work/pass.csv") as file:
+        with open(database) as file:
             for line in file:
                 line_count+=1
         return line_count
@@ -93,9 +167,7 @@ def main():
     while True:
         # create main menu
         user_count = check_user_count()
-        print(len(err_string))
-        print(f"""
-    ===========================
+        print(f"""    ===========================
         Example Auth Client
     ===========================
         Choose your option
