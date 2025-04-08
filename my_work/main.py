@@ -1,5 +1,6 @@
 import sys
 import getpass
+import bcrypt
 
 database = "my_work/pass.csv"
 
