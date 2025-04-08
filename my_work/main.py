@@ -3,12 +3,25 @@ import getpass
 import bcrypt
 
 database = "my_work/pass.csv"
+salt = b"$2b$12$ieYNkQp8QumgedUo30nuPO"
 
 def quit():
     print("Goodbye, see you later :)")
     sys.exit(0)
 
+# def encrypt(dPassword:str):
+#     mypassword = dPassword.encode('utf-8')
+
+#     hashed_password = bcrypt.hashpw(password=mypassword, salt=salt)
+#     print(f"True password: {mypassword}")
+#     print(f"Hashed password: {hashed_password}")
+#     return hashed_password
+
+# def decrypt(ePassword:str):
+
+
 def write(username:str, password:str):
+    password
     # check if user already exists
     with open(database, 'r') as file:
         for line in file:
@@ -18,6 +31,7 @@ def write(username:str, password:str):
     
     # append item to file
     with open(database, "a") as file:
+        # file.write(f"{username},{encrypt(password)}\n")
         file.write(f"{username},{password}\n")
     return ""
 
@@ -108,8 +122,10 @@ def login():
     
     search = search_file_k(database, username)
     try:
+        # if bcrypt.checkpw(password, search):
+        #     print("Authenticated successfully!")
         if password in search:
-            print("Authentication successful!")
+            print("Authenticated successfully!")
         else:
             print("Password is not correct, returning back to main menu")
             return "Incorrect Password!"
@@ -152,6 +168,7 @@ def register():
     print("Successfully created new user, returning back to main menu!")
     return ""
 
+# literally just checks the user count by enumerating the line count in db
 def check_user_count():
     try:
         line_count = 0
@@ -184,6 +201,7 @@ def main():
         """)
         choice = input("Choice: ").lower()
 
+        # match up the choice
         match choice:
             case 'q':
                 quit()
